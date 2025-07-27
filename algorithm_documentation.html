@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTE CAP Algorithm Documentation</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .algorithm-text {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            font-size: 14px;
+            white-space: pre;
+            color: #333;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to DTE CAP System</a>
+
+        <h1>DTE CAP Seat Allocation Algorithm Documentation</h1>
+
+        <div class="algorithm-text">ALGORITHM: DTE_CAP_Seat_Allocation
+
+INPUT:
+- Student_List: All students with their MHT-CET ranks
+- College_List: All participating colleges with seat matrix
+- Seat_Categories: [OPEN, SC, ST, OBC, EWS, etc.]
+- Student_Preferences: Ordered list of college-branch choices per student
+- Reservation_Policy: Category-wise seat percentages
+
+PREPROCESSING:
+1. Sort Student_List by Merit_Rank (ascending order)
+2. For each college in College_List:
+   - Calculate category-wise seat distribution based on Reservation_Policy
+   - Create separate seat pools for each category
+
+MAIN ALLOCATION PROCESS:
+For each CAP_Round (typically 3 rounds):
+
+    For each Student in Student_List (in merit order):
+        Student_Category = Get_Student_Category(Student)
+        Student_Choices = Get_Student_Preferences(Student)
+
+        For each Choice in Student_Choices (in preference order):
+            College = Choice.College
+            Branch = Choice.Branch
+            Required_Category = Student_Category
+
+            // First try allocation in student's own category
+            If Seats_Available(College, Branch, Required_Category) > 0:
+                Allocate_Seat(Student, College, Branch, Required_Category)
+                Mark_Student_As_Allocated(Student)
+                Break // Move to next student
+
+            // If no seat in own category, try OPEN category (if applicable)
+            Else If Student_Category != OPEN AND Seats_Available(College, Branch, OPEN) > 0:
+                Allocate_Seat(Student, College, Branch, OPEN)
+                Mark_Student_As_Allocated(Student)
+                Break // Move to next student
+
+    // After each round
+    Process_Seat_Acceptance() // Students confirm/reject allocated seats
+    Release_Rejected_Seats() // Add back to available pool
+    Update_Available_Seats()
+
+POST_ALLOCATION:
+1. Handle_Vacant_Seats() // Fill remaining seats through subsequent rounds
+2. Apply_Inter_Se_Merit() // For final vacant seats
+3. Generate_Final_Allotment_List()
+
+FUNCTIONS:
+
+Function Get_Student_Category(Student):
+    Return Student.Category // OPEN, SC, ST, OBC, etc.
+
+Function Seats_Available(College, Branch, Category):
+    Return College.Seat_Matrix[Branch][Category].Available_Count
+
+Function Allocate_Seat(Student, College, Branch, Category):
+    College.Seat_Matrix[Branch][Category].Available_Count -= 1
+    Student.Allocated_Seat = {College, Branch, Category}
+    Add_To_Allotment_List(Student, College, Branch)
+
+Function Process_Seat_Acceptance():
+    For each Allocated_Student:
+        If Student_Rejects_Seat OR Student_Does_Not_Report:
+            Release_Seat(Student.Allocated_Seat)
+            Mark_Student_As_Unallocated(Student)
+
+Function Handle_Vacant_Seats():
+    // Seats not filled in reserved categories can be transferred
+    For each College, Branch:
+        If Reserved_Category_Seats_Vacant:
+            Convert_To_Open_Category() // As per rules</div>
+    </div>
+</body>
+</html>
