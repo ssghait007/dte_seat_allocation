@@ -184,6 +184,65 @@
             color: #495057;
         }
 
+        .info-icon {
+            background: #6c757d;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: help;
+            position: relative;
+            margin-left: 8px;
+        }
+
+        .info-icon:hover {
+            background: #495057;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            min-width: 200px;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: #333;
+        }
+
+        .info-icon:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .preference-item {
+            display: block;
+            margin-bottom: 2px;
+        }
+
         .stats {
             grid-column: 1 / -1;
             background: linear-gradient(45deg, #ff6b6b, #ee5a24);
@@ -368,6 +427,20 @@
 
             .rank-badge, .category-badge {
                 font-size: 0.75em;
+            }
+
+            .tooltip {
+                font-size: 10px;
+                padding: 6px 10px;
+                max-width: 250px;
+                white-space: normal;
+                word-wrap: break-word;
+            }
+
+            .info-icon {
+                width: 16px;
+                height: 16px;
+                font-size: 10px;
             }
         }
     </style>
@@ -623,6 +696,20 @@
             });
         }
 
+        function getCollegeBranchName(preferenceKey) {
+            const [collegeId, branchId] = preferenceKey.split('-');
+            const college = collegeData.colleges.find(c => c.collegeId === collegeId);
+            const branch = college?.branches.find(b => b.branchId === branchId);
+
+            if (college && branch) {
+                const collegeName = college.collegeName.length > 30 ?
+                    college.collegeName.substring(0, 30) + '...' :
+                    college.collegeName;
+                return `${collegeName} - ${branch.branchName}`;
+            }
+            return preferenceKey;
+        }
+
         function displayStudentData() {
             const studentContainer = document.getElementById('studentData');
             studentContainer.innerHTML = '';
@@ -641,11 +728,23 @@
                     `<div class="allocation-info">✅ ${allocation.college} - ${allocation.branch} (${allocation.category})</div>` :
                     '<div class="allocation-info">⏳ Not Allocated</div>';
 
+                // Create preferences tooltip content
+                const preferencesHtml = student.preferences.map((pref, index) =>
+                    `<span class="preference-item">${index + 1}. ${getCollegeBranchName(pref)}</span>`
+                ).join('');
+
                 studentCard.innerHTML = `
                     <div class="student-info">
                         <span class="rank-badge">Rank ${student.mhtCetRank}</span>
                         <span class="category-badge ${student.category}">${student.category}</span>
                         <strong>${student.studentName}</strong>
+                        <span class="info-icon">
+                            i
+                            <div class="tooltip">
+                                <strong>Preferences:</strong><br>
+                                ${preferencesHtml}
+                            </div>
+                        </span>
                     </div>
                     ${allocationInfo}
                 `;
